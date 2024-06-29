@@ -1,18 +1,19 @@
 'use client';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import { signIn, useSession } from 'next-auth/react';
 import { FaGithub, FaFacebook } from 'react-icons/fa';
 import { FcGoogle } from "react-icons/fc";
 import { useRouter, useSearchParams } from 'next/navigation';
 import SocialSingin from '@/components/shared/SocialSingin';
 
-const Page = () => {
+const LoginPage = () => {
     const router = useRouter();
-    const session = useSession()
+    const session = useSession();
     const searchParams = useSearchParams();
     const path = searchParams.get("redirect");
+
     const handleLogin = async (event) => {
         event.preventDefault();
         const email = event.target.email.value;
@@ -21,7 +22,7 @@ const Page = () => {
             email,
             password,
             redirect: true,
-      callbackUrl: path ? path : "/",
+            callbackUrl: path ? path : "/",
         });
         console.log(resp);
         if (resp.status === 200) {
@@ -29,11 +30,8 @@ const Page = () => {
         }
     };
 
-    const handleSocialLogin =  (provider) => {
-        const response = signIn(provider, {redirect: false }); 
-    };
-    if(session.status === "authenticated"){
-        router.push('/')
+    if (session.status === "authenticated") {
+        router.push('/');
     }
 
     return (
@@ -74,11 +72,11 @@ const Page = () => {
                     </form>
                     <div className='mt-8 text-center'>
                         <h2 className='text-lg font-semibold mb-4'>Or Sign In With</h2>
-                        <SocialSingin></SocialSingin>
+                        <SocialSingin />
                         <div>
                             <h6 className="my-12 text-center">
                                 You dont have an account?{" "}
-                                <Link className="text-primary font-semibold" href={"/singup"}>
+                                <Link className="text-primary font-semibold no-underline hover:underline" href="/signup">
                                     Sign Up
                                 </Link>
                             </h6>
@@ -90,4 +88,10 @@ const Page = () => {
     );
 };
 
-export default Page;
+const LoginWrapper = () => (
+    <Suspense fallback={<div>Loading...</div>}>
+        <LoginPage />
+    </Suspense>
+);
+
+export default LoginWrapper;

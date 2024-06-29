@@ -1,29 +1,35 @@
-'use client'
+'use client';
 import SocialSingin from '@/components/shared/SocialSingin';
 import Image from 'next/image';
 import Link from 'next/link';
-import React, { useState } from 'react';
+import React, { Suspense } from 'react';
 
-const Page = () => {
-    const handleSingUp = async (event)=>{
+const SignUpPage = () => {
+    const handleSignUp = async (event) => {
         event.preventDefault();
         const newUser = {
             name: event.target.name.value,
             email: event.target.email.value,
             password: event.target.password.value,
-          };
-          const resp = await fetch('http://localhost:3000/singup/api',{
+        };
+
+        const resp = await fetch('/api/signup', {
             method: "POST",
-            body : JSON.stringify(newUser),
+            body: JSON.stringify(newUser),
             headers: {
-                "content-type" : "application/json"
+                "Content-Type": "application/json"
             }
-          })
-          console.log(resp)
-          if(resp.status === 200){
-            event.target.reset()
-          }
-    }
+        });
+
+        console.log(resp);
+        if (resp.status === 201) {
+            event.target.reset();
+        } else {
+            const result = await resp.json();
+            console.error(result.message);
+        }
+    };
+
     return (
         <div className='container px-6 md:px-24 mx-auto py-24 bg-cyan-200'>
             <div className='grid grid-cols-1 lg:grid-cols-2 gap-12 items-center'>
@@ -36,8 +42,8 @@ const Page = () => {
                     />
                 </div>
                 <div className='border-2 border-gray-200 p-12 rounded-lg shadow-lg bg-white'>
-                    <h1 className='text-5xl text-orange-600 font-bold text-center mb-6'>Sign Up Here !</h1>
-                    <form onSubmit={handleSingUp} className='space-y-6'>
+                    <h1 className='text-5xl text-orange-600 font-bold text-center mb-6'>Sign Up Here!</h1>
+                    <form onSubmit={handleSignUp} className='space-y-6'>
                         <div>
                             <label htmlFor='name' className='block text-lg font-semibold mb-2'>Your Name</label>
                             <input
@@ -66,19 +72,19 @@ const Page = () => {
                             />
                         </div>
                         <button className='w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-md shadow-md transition-all duration-300 font-semibold'>
-                            Sign In
+                            Sign Up
                         </button>
                     </form>
                     <div className='mt-8 text-center'>
-                        <h2 className='text-lg font-semibold mb-4'>Or Sign In With</h2>
-                        <SocialSingin></SocialSingin>
+                        <h2 className='text-lg font-semibold mb-4'>Or Sign Up With</h2>
+                        <SocialSingin />
                         <div>
-                        <h6 className="my-12 text-center">
-              Already have account ?{" "}
-              <Link className="text-primary font-semibold" href={"/login"}>
-                Sign In
-              </Link>
-            </h6>
+                            <h6 className="my-12 text-center">
+                                Already have an account?{" "}
+                                <Link className="text-primary font-semibold" href={"/login"}>
+                                    Sign In
+                                </Link>
+                            </h6>
                         </div>
                     </div>
                 </div>
@@ -87,4 +93,10 @@ const Page = () => {
     );
 };
 
-export default Page;
+const SignUpWrapper = () => (
+    <Suspense fallback={<div>Loading...</div>}>
+        <SignUpPage />
+    </Suspense>
+);
+
+export default SignUpWrapper;
